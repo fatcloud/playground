@@ -12,11 +12,11 @@ from random import random as r
 from functools import partial
     
 from kivy.app import App
-from kivy.uix.gridlayout import GridLayout
-from kivy.core.window import window
+from kivy.uix.boxlayout import BoxLayout
+from kivy.core.window import Window
 
 
-class BoxesCanvus(GridLayout):
+class BoxesCanvus(BoxLayout):
 
     def __init__(self, **kwargs):
         super(BoxesCanvus, self).__init__(**kwargs)
@@ -29,8 +29,8 @@ class BoxesCanvus(GridLayout):
         self._keyboard = None
         
 
-    def on_key_down(self, keyboard, keycode, text, modifiers):
-        
+    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        print 'hahaha'
         
     def add_rects(self, count, *largs):
         with self.canvas:

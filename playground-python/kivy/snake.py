@@ -18,18 +18,21 @@ class BoxesCanvus(Widget):
 
     def __init__(self, **kwargs):
         super(BoxesCanvus, self).__init__(**kwargs)
-        self.cols = 1
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down=self._on_key_down)
 
     def _keyboard_closed(self):
-        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
+        self._keyboard.unbind(on_key_down=self._on_key_down)
         self._keyboard = None
         
-
-    def _on_key_down(self, keyboard, keycode, text, modifiers):
-        self.add_rects(100)
+    def _init_key_func_map():
+        self._key_func_map
         
+    def _on_key_down(self, keyboard, keycode, text, modifiers):
+        print keycode[1]
+
+
+
     def add_rects(self, count, *largs):
         with self.canvas:
             for x in range(count):

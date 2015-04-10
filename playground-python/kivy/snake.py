@@ -1,15 +1,7 @@
-'''
-Canvas stress
-=============
-
-This is just a test for testing the performance of our Graphics engine.
-'''
-
 from kivy.uix.widget import Widget
 from kivy.app import App
 from kivy.graphics import Color, Rectangle
 from random import random as r
-from functools import partial
     
 from kivy.core.window import Window
 
@@ -29,8 +21,8 @@ class BoxesCanvus(Widget):
         self._key_func_map
         
     def _on_key_down(self, keyboard, keycode, text, modifiers):
-        print keycode[1]
-
+        print 'the key', keycode, 'with modifier', modifiers, 'is pressed'
+        return True
 
 
     def add_rects(self, count, *largs):

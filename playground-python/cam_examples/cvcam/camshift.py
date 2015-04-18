@@ -52,6 +52,8 @@ class MainCanvus(Widget):
     def _keyboard_closed(self):
         self._keyboard.unbind(on_key_down=self._on_key_down)
         self._keyboard = None
+        cv2.VideoCapture.release()
+        print 'yooo'
                 
     def _on_key_down(self, keyboard, keycode, text, modifiers):
         print 'the key', keycode, 'with modifier', modifiers, 'is pressed'
@@ -72,39 +74,21 @@ class MainCanvus(Widget):
 class MyApp(App):
 
     def build(self):
-        bc = MainCanvus()
-        return bc
+        self.bc = MainCanvus()
+        return self.bc
 
     def on_start(self):
         self.root.add_rects(100)
 
-
+    def on_stop(self):
+        self.bc.cam.release()
+        
 if __name__ == '__main__':
     print __doc__
     MyApp().run()
-    
+    print 'haha'
 
 
 
-
-class App(object):
-    def __init__(self):
-        
-        cv2.namedWindow('camshift')
- 
-    def run(self):
-        while True:
-            ret, self.frame = self.cam.read()
-            vis = self.frame.copy()
-            hsv = cv2.cvtColor(self.frame, cv2.COLOR_BGR2HSV)
-
-            cv2.imshow('camshift', vis)
-
-            ch = 0xFF & cv2.waitKey(5)
-            if ch == 27:
-                break
-            if ch == ord('b'):
-                self.show_backproj = not self.show_backproj
-        cv2.destroyAllWindows()
 
 

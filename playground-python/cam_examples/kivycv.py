@@ -10,7 +10,6 @@ from kivy.graphics.texture import Texture
 
 import cv2
 import numpy as np
-import time
 
 class CamApp(App):
 
@@ -25,22 +24,6 @@ class CamApp(App):
         Clock.schedule_interval(self.update, 1.0/60.0)
         return layout
 
-    def CreateImage(self, (height, width), bits=np.uint8, channels=3, color=(0, 0, 0)): # (cv.GetSize(frame), 8, 3)
-        """Create new image(numpy array) filled with certain color in RGB"""
-        # Create black blank image
-        if bits == 8:
-            bits = np.uint8
-        elif bits == 32:
-            bits = np.float32
-        elif bits == 64:
-            bits = np.float64
-        image = np.zeros((height, width, channels), bits)
-        if color != (0, 0, 0):
-            # Fill image with color
-            image[:] = color
-        return image
-
-
     def update(self, dt):
         # display image from cam in opencv window
         ret, frame = self.capture.read()
@@ -51,6 +34,9 @@ class CamApp(App):
         texture1.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
         # display image from the texture
         self.img1.texture = texture1
+
+    def on_stop(self):
+        self.capture.release()
 
 if __name__ == '__main__':
     CamApp().run()

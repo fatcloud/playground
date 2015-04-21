@@ -7,7 +7,6 @@ from kivy.uix.image import Image
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
 
-import caminfo
 import cv2
 import numpy as np
 
@@ -23,21 +22,30 @@ class CamApp(App):
         layout.add_widget(self.img1)
         #opencv2 stuffs
         self.capture = cv2.VideoCapture(0)
-        # self.capture.set(3,1280)
-        # self.capture.set(4,720)
         
-        ret, frame = self.capture.read()
+        # do the matching
+        self.orb = cv2.ORB()
+        self.kp, self.des = None, None
+        self.bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        
+        ret, self.frame = self.capture.read()
         Clock.schedule_interval(self.update, 1.0/60.0)
         return layout
 
     def on_touch_down(self,touch):
-        print caminfo.cv_cap_info(self.capture)
+        self.kp, self.des = self.orb.detectAndCompute(self.frame,None)
         return True
         
     def update(self, dt):
         # display image from cam in opencv window
         ret, frame = self.capture.read()
         # convert it to texture
+        if self.kp != None:
+            kp, des = self.orb.detectAndCompute(frame,None)
+            matches = self.bf.match(self.des,des)
+            matches = sorted(matches, key = lambda x:x.distance)
+            frame = cv2.drawMatches(self.frame, self.kp, frame, kp, matches[:10], flags=2)
+
         buf1 = cv2.flip(frame, -1)
         buf = buf1.tostring()
         texture1 = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt='bgr')
@@ -45,14 +53,12 @@ class CamApp(App):
         # display image from the texture
         self.img1.texture = texture1
 
-    
-        
     def on_stop(self):
         self.capture.release()
 
 if __name__ == '__main__':
     Config.set('graphics','show_cursor',0)
-    Config.set('graphics','fullscreen',1)
+    Config.set('graphics','fullscreen',0)
     Config.write()
     CamApp().run()
 

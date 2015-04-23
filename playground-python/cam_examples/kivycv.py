@@ -20,14 +20,14 @@ class CamApp(App):
         self.img1.on_touch_down = self.on_touch_down
         layout = BoxLayout()
         layout.add_widget(self.img1)
-        #opencv2 stuffs
+        # opencv2 stuffs
         self.capture = cv2.VideoCapture(0)
-        
+
         # do the matching
         self.orb = cv2.ORB()
         self.kp, self.des = None, None
         self.bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-        
+
         ret, self.frame = self.capture.read()
         Clock.schedule_interval(self.update, 1.0/60.0)
         return layout

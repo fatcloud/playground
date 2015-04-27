@@ -7,14 +7,14 @@ import Queue
 import time
 
 import thread
-import worker
-import kivy_worker
+from worker import Worker
+from kivy_worker import KivyWorker
 from kivy.graphics import Color, Rectangle
 from random import random as r
 from kivy.base import runTouchApp
 
 
-class SimpleModel(worker.Worker):
+class SimpleModel(Worker):
 
     def __init__(self):
         super(SimpleModel, self).__init__()
@@ -34,10 +34,10 @@ class SimpleModel(worker.Worker):
         return []
 
         
-class SimpleWindow(kivy_worker.KivyWorker):
+class SimpleWindow(KivyWorker):
 
-    def __init__(self, model=None):
-        super(SimpleWindow, self).__init__(model)
+    def __init__(self):
+        super(SimpleWindow, self).__init__()
         self._signal_to_model = []
 
     def _execute_a_keyboard_mission(self, mission):
@@ -67,10 +67,11 @@ class SimpleWindow(kivy_worker.KivyWorker):
 if __name__ == '__main__':
     # print __doc__
     sm = SimpleModel()
-    sm.start_loop()
     sw = SimpleWindow()
-    sw.model = sm
-    # runTouchApp(SimpleWindow(sm))
+    # The module that work slower shall keep the list of co-workers
+    sw.init_inout_list([sm], [sm])  
+
+    sm.start_loop()
     runTouchApp(sw)
 
 

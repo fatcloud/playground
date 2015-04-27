@@ -21,12 +21,9 @@ from worker import Worker
 
 class KivyWorker(Widget, Worker):
 
-    def __init__(self, model=None):
+    def __init__(self):
         Widget.__init__(self)
         Worker.__init__(self)
-        self._model = [model]
-        self.in_list  = self._model
-        self.out_list = self._model
         
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down=self.__on_key_down)
@@ -43,19 +40,7 @@ class KivyWorker(Widget, Worker):
         mission = {'immediate':True}
         mission.update(key_info)
         self.add_todo(mission)
-    
-    @property
-    def model(self):
-        try: return self._model[0]
-        except AttributeError: return None
-    
-    @model.setter
-    def model(self, value):
-        if value not in self._model:
-            self._model = [value]
-            self.in_list  = self._model
-            self.out_list = self._model
-        
+            
     def __update_frame(self, dt):
         self.routine()
 

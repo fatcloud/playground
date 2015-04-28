@@ -89,7 +89,7 @@ class App:
 def main():
     import sys
     try: video_src = sys.argv[1]
-    except: video_src = 1
+    except: video_src = 0
 
     print __doc__
     App(video_src).run()

@@ -22,7 +22,6 @@ class CamApp(App):
         layout.add_widget(self.img1)
         # opencv2 stuffs
         self.capture = cv2.VideoCapture(0)
-
         # do the matching
         self.orb = cv2.ORB()
         self.kp, self.des = None, None
@@ -44,7 +43,8 @@ class CamApp(App):
             kp, des = self.orb.detectAndCompute(frame,None)
             matches = self.bf.match(self.des,des)
             matches = sorted(matches, key = lambda x:x.distance)
-            frame = cv2.drawMatches(self.frame, self.kp, frame, kp, matches[:10], flags=2)
+            print 'len =', len(matches), type(matches[0]), matches[0]
+            # frame = cv2.drawMatches(self.frame, self.kp, frame, kp, matches[:10], flags=2)
 
         buf1 = cv2.flip(frame, -1)
         buf = buf1.tostring()
@@ -57,7 +57,7 @@ class CamApp(App):
         self.capture.release()
 
 if __name__ == '__main__':
-    Config.set('graphics','show_cursor',0)
+    Config.set('graphics','show_cursor',1)
     Config.set('graphics','fullscreen',0)
     Config.write()
     CamApp().run()

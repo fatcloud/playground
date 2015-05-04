@@ -7,10 +7,12 @@ from kivy.graphics.transformation import Matrix
 from kivy.graphics.opengl import *
 from kivy.graphics import *
 from objloader import ObjFile
-
+import cv2
 
 class Renderer(Widget):
     def __init__(self, **kwargs):
+        self.cam = cv2.VideoCapture(0)
+        
         self.canvas = RenderContext(compute_normal_mat=True)
         self.canvas.shader.source = resource_find('simple.glsl')
         self.scene = ObjFile(resource_find("monkey.obj"))
@@ -35,13 +37,14 @@ class Renderer(Widget):
         self.canvas['projection_mat'] = proj
         self.canvas['diffuse_light'] = (1.0, 1.0, 0.8)
         self.canvas['ambient_light'] = (0.1, 0.1, 0.1)
-        self.rot.angle += 1
+        # self.rot.angle += 1
+        print self.rot.angle
 
     def setup_scene(self):
         Color(1, 1, 1, 1)
         PushMatrix()
         Translate(0, 0, -3)
-        self.rot = Rotate(1, 0, 1, 0)
+        self.rot = Rotate(0, 0, 1, 0)
         m = self.scene.objects.values()[0]
         UpdateNormalMatrix()
         self.mesh = Mesh(

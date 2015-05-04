@@ -1,6 +1,3 @@
-import cv2
-import numpy as np
-import glob
 
 """
 usage: >>>python AR_static.py
@@ -9,6 +6,12 @@ This program load the files in ./origin/*jpg.
 It find 8*5 chessboard in the pictures and compute the pose of it
 finally it draws the three axis and show them
 """
+
+
+
+import cv2
+import numpy as np
+import glob
 
 
 # Load previously saved data
@@ -26,6 +29,7 @@ def draw(img, corners, imgpts):
     return img
     
 
+print __name__.__doc__
 
 shp = (8, 5)
     
@@ -55,7 +59,9 @@ for fname in glob.glob('./origin/*.jpg'):
         img = draw(img,corners,imgpts)
         cv2.imshow('img',img)
         k = cv2.waitKey(0) & 0xff
-        if k == 's':
-            cv2.imwrite(fname[:6]+'.png', img)
+        if k == ord('s'):
+            filename = 'modified_' + fname
+            cv2.imwrite(filename, img)
+            print 'saved to ' + filename
 
 cv2.destroyAllWindows()

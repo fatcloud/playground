@@ -1,3 +1,10 @@
+"""
+usage: >>>python AR_realtime.py
+
+This program tries to detect chessboard from camera image
+and draw axis in real-time
+"""
+
 import cv2
 import numpy as np
 import glob
@@ -26,13 +33,16 @@ objp[:,:2] = np.mgrid[0:shp[0],0:shp[1]].T.reshape(-1,2)
 
 axis = np.float32([[3,0,0], [0,3,0], [0,0,-3]]).reshape(-1,3)
 
-camera = cv2.VideoCapture(0)
+
+camera = cv2.VideoCapture(1)
+if not camera.isOpened():
+    camera = cv2.VideoCapture(0)
 
 
 while True:
     
     img = camera.read()[1]
-    
+    img = cv2.flip(img, 1)
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     ret, corners = cv2.findChessboardCorners(gray, shp, None)
 
@@ -52,5 +62,7 @@ while True:
     k = cv2.waitKey(5) & 0xff
     if k == 27:
         break
+    elif k == ord('s'):
+        cv2.imwrite('result.png', img)
 
 cv2.destroyAllWindows()

@@ -74,5 +74,5 @@ if __name__ == '__main__':
         back = mix_image(back, fore, (w * 1.2 * (rdm() - 0.2),h * 1.2 * (rdm() - 0.2)))
         
     cv2.imshow('mixed', back)
-    
+    cv2.imwrite('mixed.png', back)
     cv2.waitKey(0)

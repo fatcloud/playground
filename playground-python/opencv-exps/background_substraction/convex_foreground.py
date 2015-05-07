@@ -39,6 +39,9 @@ cv2.namedWindow(winName, cv2.CV_WINDOW_AUTOSIZE)
 
 cam = cv2.VideoCapture(1)
 
+if not cam.isOpened():
+    cam = cv2.VideoCapture(0)
+
 md = MotionDetector(N=2, cam=cam)
 cam_x, cam_y, _ = cam.read()[1].shape
 

@@ -10,6 +10,10 @@ from time import clock
 class MyCam(object):
 
     def __init__(self, src=None):
+        self.start_cam(src)
+        self.__fcount, self.__frate, self.__start = 0, 0, 0
+    
+    def start_cam(self, src=None):
         if src is not None:
             self.cam = VideoCapture(src)
             if not self.cam.isOpened():
@@ -18,9 +22,7 @@ class MyCam(object):
         self.cam = cv2.VideoCapture(1)
         if not self.cam.isOpened():
             self.cam = cv2.VideoCapture(0)
-            
-        self.__fcount, self.__frate, self.__start = 0, 0, 0
-            
+        
     @property
     def size(self):
         w = self.cam.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
@@ -60,22 +62,43 @@ class MyCam(object):
         cmd = 'self.cam.set( cv2.cv.CV_CAP_PROP_' + property + ', ' + str(value) + ')'
         print cmd
         exec cmd
-        
+    
+    def cam_loop(self, func, params = ()):
+        while True:
+            input = self.read()
+            output = func(input, *params)
+            cv2.imshow('cam.read()', output)
+            k = cv2.waitKey(5)
+            if k == 27:
+                break
+            elif k == ord('p'):
+                info = self.info
+                for i in info:
+                    print i,'=', info[i]
+            elif k == ord('s'):
+                p = raw_input('type property:')
+                v = raw_input('type value:')
+                self.set(p,v)
+            elif k == ord('f'):
+                print self.frame_rate
+    
+    # __enter__ + __exit__ = with MyCam as cam:
+    # this ensures that the camera will be released
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.cam.release()
+    
+    def release(self):
+        self.cam.release()
+    
 if __name__ == '__main__':
     cam = MyCam()
     cam.size = (800, 600)
-    while True:
-        cv2.imshow('cam.read()',cam.read())
-        k = cv2.waitKey(5)
-        if k == 27:
-            break
-        elif k == ord('p'):
-            info = cam.info
-            for i in info:
-                print i,'=', info[i]
-        elif k == ord('s'):
-            p = raw_input('type property:')
-            v = raw_input('type value:')
-            cam.set(p,v)
-        elif k == ord('f'):
-            print cam.frame_rate
+    
+    def dummy(input):
+        return input
+        
+    cam.cam_loop(dummy)
+        

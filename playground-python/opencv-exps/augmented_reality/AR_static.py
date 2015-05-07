@@ -5,6 +5,9 @@ usage: >>>python AR_static.py
 This program load the files in ./origin/*jpg.
 It find 8*5 chessboard in the pictures and compute the pose of it
 finally it draws the three axis and show them
+
+In case the camera matrix file "camera_parameters.npz" does not exist,
+run calibration example to generate one
 """
 
 

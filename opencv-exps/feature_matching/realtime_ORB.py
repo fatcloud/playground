@@ -93,3 +93,4 @@ while True:
     
     cv2.imshow('matches', img3)
     
+cv2.waitKey(0)

@@ -3,15 +3,17 @@ import numpy as np
 from cam import MyCam
 
 
-
 def detect_square(input):
     img = input.copy()
     lo, hi = 100, 150
     
     edge = cv2.Canny(img, lo, hi)
+    
     thresh1, dst = cv2.threshold(edge,127,255,cv2.THRESH_BINARY)
     
     ctr, hry = cv2.findContours(dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
+    if hry is None: return img
     hry = hry[0]
     
     for idx, cnt in enumerate(ctr):

@@ -7,7 +7,7 @@ import numpy as np
 from cam import MyCam
 
 from fmatch import draw_match
-
+from buildpyr import buildpyr
 
 MIN_MATCH_COUNT = 10
 
@@ -15,7 +15,7 @@ MIN_MATCH_COUNT = 10
 orb = cv2.ORB()
 cam = MyCam()
 cam.size = (640, 480)
-img1 = img1 = cv2.imread('box.png',0)
+img1 = img1 = cv2.imread('box.png', 0)
 while True:
     
     img2 = cv2.flip(cv2.cvtColor(cam.read(), cv2.COLOR_BGR2GRAY), 1)
@@ -38,7 +38,6 @@ while True:
     
     # If nothing match then continue
     if des2 is None:
-        print
         img3 = img3 = draw_match(img1,kp1,img2,kp2,[])
         continue
     
@@ -93,4 +92,5 @@ while True:
     
     cv2.imshow('matches', img3)
     
+print 'press any key to continue'
 cv2.waitKey(0)

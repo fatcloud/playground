@@ -32,24 +32,26 @@ class MotionDetector(object):
         self._frame[self._index] = image
         self.diff_img()
         
-    
 
-winName = "cam test"
-cv2.namedWindow(winName, cv2.CV_WINDOW_AUTOSIZE)
-# Read three images first:
+        
+if __name__ == '__main__':
 
-cam = MyCam()
-md = MotionDetector(N=2, shape=cam.read().shape)
+    winName = "cam test"
+    cv2.namedWindow(winName, cv2.CV_WINDOW_AUTOSIZE)
+    # Read three images first:
 
-while True:
-    
-    md.feed_image(cam.read())
-    cv2.imshow(winName, md.diff)
-    
-    key = cv2.waitKey(10)
-    if key == 27 or key == 32:
-        md.cam.release()
-        cv2.destroyWindow(winName)
-        break
+    cam = MyCam()
+    md = MotionDetector(N=2, shape=cam.read().shape)
 
-print "Goodbye"
+    while True:
+        
+        md.feed_image(cam.read())
+        cv2.imshow(winName, md.diff)
+        
+        key = cv2.waitKey(10)
+        if key == 27 or key == 32:
+            cam.release()
+            cv2.destroyWindow(winName)
+            break
+
+    print "Goodbye"

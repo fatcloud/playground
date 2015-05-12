@@ -16,6 +16,8 @@ orb = cv2.ORB()
 cam = MyCam()
 cam.size = (640, 480)
 img1 = img1 = cv2.imread('box.png', 0)
+
+cv2.imshow('source', img1)
 while True:
     
     img2 = cv2.flip(cv2.cvtColor(cam.read(), cv2.COLOR_BGR2GRAY), 1)

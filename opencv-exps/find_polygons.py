@@ -1,37 +1,38 @@
 from cv2 import *
 import numpy as np
 from cam import MyCam
+from time import time
 
-
-def find_polygons(image_in, edge_num, tolerance=0.1, area_threshold=100, convex_only=True):
+def find_polygons(gray_image_in, edge_num, tolerance=0.1, area_threshold=100, convex_only=True):
     """find contours that appears to be a """
-    img = image_in.copy()
+    img = gray_image_in.copy()
     lo, hi = 100, 150
     
+    # imshow('img', img)
     edge = Canny(img, lo, hi)
     # imshow('edge', edge)
-    thresh1, dst = threshold(edge,127,255,THRESH_BINARY)
+    thresh1, dst = threshold(edge,60,255,THRESH_BINARY)
     # imshow('thresh', dst)
     ctr, hry = findContours(dst, RETR_TREE, CHAIN_APPROX_SIMPLE)
-    imshow('fndctr', dst)
+    # imshow('fndctr', dst)
     
-    if hry is None: return img
+    if hry is None: return []
     hry = hry[0]
     
-    squares = []
+    polygons = []
     for cnt in ctr:
-        
+
         # kill the contour if it doesn't look like a square
-        epsilon = tolerance*arcLength(cnt,True)
+        cnt = cnt.reshape(-1,2)
+        epsilon = tolerance * 2 * ((3.14 * contourArea(cnt)) ** 0.5)
         tmp = approxPolyDP(cnt,epsilon,True)
-        
+
         if len(tmp) != edge_num: continue
         if convex_only and not isContourConvex(tmp): continue 
         if contourArea(tmp) < area_threshold: continue
-        squares.append(cnt)
-        
-        
-    return squares
+        polygons.append(tmp)
+    
+    return polygons
     
 if __name__ == "__main__":
     cam = MyCam()

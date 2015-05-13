@@ -1,19 +1,21 @@
-import cv2
+from cv2 import *
 import numpy as np
 from motion_detect import MotionDetector
 from cam import MyCam
-from find_square_code import find_polygons
+from find_polygons import find_polygons
 
+win_size = (300, 300)
 if __name__ == '__main__':
-    img = np.full((600,800,3), 0, np.uint8)
+    img = np.full((win_size[0], win_size[1], 3), 0, np.uint8)
 
-    m_255 = np.full((600,800), 255, np.uint8)
-    m_0 = np.full((600,800), 0, np.uint8)
+    m_255 = np.full(win_size, 255, np.uint8)
+    m_0 = np.full(win_size, 0, np.uint8)
 
     img[:,:,0] = m_255[:,:]
     index = 0
     
     cam = MyCam()
+    
     md = MotionDetector(N=2, shape=cam.read().shape)
     
     while True:
@@ -26,31 +28,36 @@ if __name__ == '__main__':
         img[:, :, index] = m_255
         
         cam_img = cam.read()
+        # imshow('cam_img', cam_img)
         md.feed_image(cam_img)
-        gray_diff = cv2.cvtColor(md.diff, cv2.COLOR_BGR2GRAY)
-        # blured = cv2.blur(gray_diff, (5,5))
+        # imshow('md.diff',md.diff)
+        gray_diff = cvtColor(md.diff, COLOR_BGR2GRAY)
+        # imshow('',gray_diff)
+        # blured = GaussianBlur(gray_diff, (5,5), 0)
         
-        # # edges = cv2.Canny(gray_diff, 100, 200)
-        # _, th = cv2.threshold(gray_diff, 80, 255, cv2.THRESH_BINARY)
+        # # edges = Canny(gray_diff, 100, 200)
+        # _, th = threshold(gray_diff, 80, 255, THRESH_BINARY)
         
-        # contours, hry = cv2.findContours(th, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # contours, hry = findContours(th, RETR_TREE, CHAIN_APPROX_SIMPLE)
         
         # screens = []
         # for ctr in contours:
-            # epsilon = 0.2*cv2.arcLength(ctr,True)
-            # tmp = cv2.approxPolyDP(ctr,epsilon,True)
-            # print len(tmp), cv2.contourArea(tmp)
-            # if len(tmp) == 4 and cv2.contourArea(tmp) > 1000:
+            # epsilon = 0.2*arcLength(ctr,True)
+            # tmp = approxPolyDP(ctr,epsilon,True)
+            # print len(tmp), contourArea(tmp)
+            # if len(tmp) == 4 and contourArea(tmp) > 1000:
                 # screens.append(tmp)
         
-        quadrangles = find_polygons(cam_img, 4, 0.5, 1000)
-        # th = cv2.cvtColor(gray_diff, cv2.COLOR_GRAY2BGR)
-        print quadrangles
+        quadrangles = find_polygons(gray_diff, 4, 0.01, 1000)
+        # th = cvtColor(gray_diff, COLOR_GRAY2BGR)
+        # print quadrangles
+        c = [0,0,0]
+        c[index] = 255
         for ctr in quadrangles:
-            cv2.drawContours(cam_img, [ctr], 0, (0, 0, 255), 3)
+            drawContours(cam_img, [ctr], 0, (c[0], c[1], c[2]), 3)
         
-        cv2.imshow('motion', cam_img)
-        cv2.imshow('BGR', img)
-        k = cv2.waitKey(300)
+        imshow('motion', cam_img)
+        imshow('BGR', img)
+        k = waitKey(5)
         if k == 27:
             break

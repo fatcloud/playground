@@ -43,21 +43,21 @@ if __name__ == '__main__':
         return randint(0, 255)
     
     cam_img = None
-    while sf.screens is None:
+    while True:
         
         img = np.full((win_size[0], win_size[1], 3), (r(), r(), r()), np.uint8)
         imshow('BGR', img)
         
         cam_img = cam.read()
         sf.put_cam_img(cam_img)
-        imshow('motion', cam_img)
+        
         k = waitKey(5)
         if k == 27:
             break
     
-    for rect in sf.screens:
-        drawContours(cam_img, [rect], 0, (128, 0, 128), 3)
+        if sf.screens != None:
+            for rect in sf.screens:
+                drawContours(cam_img, [rect], 0, (0, 0, 255), 3)
+            
+        imshow('motion', cam_img)
     
-    imshow('motion', cam_img)
-    
-    waitKey(0)

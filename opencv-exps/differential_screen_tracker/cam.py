@@ -19,7 +19,6 @@ class MyCam(object):
             self.cam = VideoCapture(src)
             if not self.cam.isOpened():
                 raise ValueError('Cannot open ' + src + 'as VideoCapture')
-            return
         
         self.cam = cv2.VideoCapture(1)
         if not self.cam.isOpened():

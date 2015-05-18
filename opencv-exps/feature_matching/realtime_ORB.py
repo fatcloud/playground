@@ -77,9 +77,6 @@ while True:
         dst = cv2.perspectiveTransform(pts,M)
         
         area = cv2.contourArea(dst)
-        print area
-        if area < 10:
-            print 'haha'
         
         cv2.polylines(img2,[np.int32(dst)],True,255,3)
 
@@ -94,4 +91,3 @@ while True:
     cv2.imshow('matches', img3)
     
 print 'press any key to continue'
-cv2.waitKey(0)

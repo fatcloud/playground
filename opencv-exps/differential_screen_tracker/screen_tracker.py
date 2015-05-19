@@ -27,6 +27,24 @@ class ScreenFinder(object):
             # The camera is probably not synchronized with display
             self.screens = quadrangles
 
+    def find_laser_spots(self, screen_img, cam_img):
+        # map cam_img to the same size of screen_img
+        # diff the image
+        # find green/red spots
+        src_pts = self.screens[0]
+        
+        """
+        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+        matchesMask = mask.ravel().tolist()
+        
+        h,w = img1.shape
+        pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
+        dst = cv2.perspectiveTransform(pts,M)
+        """   
+        
+    def reset(self):
+        self.screens = None
+            
     def find(self):
         pass
 
@@ -34,30 +52,36 @@ class ScreenFinder(object):
 if __name__ == '__main__':
     
     from random import randint
-    win_size = (300, 300)
+    win_size = (600, 800, 3)
 
     cam = MyCam()
     sf = ScreenFinder()
     
-    def r():
-        return randint(0, 255)
+    def r(): return randint(0, 255)
+    black = np.full(win_size, (0, 0, 0), np.uint8)
     
-    cam_img = None
     while True:
-        
-        img = np.full((win_size[0], win_size[1], 3), (r(), r(), r()), np.uint8)
-        imshow('BGR', img)
-        
-        cam_img = cam.read()
-        sf.put_cam_img(cam_img)
-        
         k = waitKey(5)
         if k == 27:
             break
-    
-        if sf.screens != None:
-            for rect in sf.screens:
-                drawContours(cam_img, [rect], 0, (0, 0, 255), 3)
+        if k == ord('r'):
+            sf.reset()
+        
+        cam_img = cam.read()
+        while sf.screens is None:
             
-        imshow('motion', cam_img)
-    
+            img = np.full(win_size, (r(), r(), r()), np.uint8)
+            imshow('main', img)
+            
+            cam_img = cam.read()
+            sf.put_cam_img(cam_img)
+            k = waitKey(5)
+            
+        for rect in sf.screens:
+            drawContours(cam_img, [rect], 0, (0, 0, 255), 3)
+        
+        imshow('main', black)
+        imshow('screen finder', cam_img)
+            
+        
+        

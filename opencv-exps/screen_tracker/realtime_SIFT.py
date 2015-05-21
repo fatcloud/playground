@@ -14,7 +14,7 @@ MIN_MATCH_COUNT = 10
 # Initiate SIFT detector
 sift = cv2.SIFT()
 cam = MyCam()
-cam.size = (160, 120)
+cam.size = (640, 480)
 img1 = cv2.imread('seabunny1600.png', 0)
 cv2.imshow('source', img1)
 

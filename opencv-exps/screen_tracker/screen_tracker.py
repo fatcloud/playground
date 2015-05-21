@@ -6,12 +6,26 @@ from fmatch import draw_match
 from find_polygons import find_polygons, draw_oriented_polylines
 
 class ScreenFinder(object):
-    """This class find the location of the screen by checking
-    if there is a quadrangle area that varies with respect to time"""
+    """This class find the location of the screen by feature matching
+    a screen image set by set_screen_img with camera image loaded by
+    find_screen_img.
+    
+    1. set_screen_img(your_image)
+    
+    2. find_screen_img(camera_image)
+            After this, a tranform matrix along with a list of four corners
+            of your screen is found and saved in ScreenFinder, which will be
+            used to find the top view of the screen saw by the camera
+            
+    3. find_top_view(camera_image)
+            return the top view of the screen found in camera
+    
+    """
 
     def __init__(self):
         self.screen_shape = None
         self.screen_corners = None
+        
         self.recovery_matrix = None
         
         self._detector = cv2.SIFT()
@@ -19,24 +33,32 @@ class ScreenFinder(object):
         
         self._screen_features = None
     
+    def calibrate_color(self, cam_img, screen_img):
+        cam_shot = self.find_top_view(cam_img)
+        screen_img
+    
     def set_screen_img(self, screen_img):
         self._screen_features = self._detector.detectAndCompute(screen_img,None)
         self._screen_img = screen_img
     
     def find_screen_img(self, cam_img, screen_img=None, debug=True):
+        """
+        Find screen_img in cam_img.
+        If executed successfully, the function return True.
+        Meanwhile self.recovery_matrix will be computed, which is used to
+        map camera image to top view
+        """
         
         MIN_MATCH_COUNT = 10
         FLANN_INDEX_KDTREE = 0
         
-        
-        if screen_img == None:
+        if screen_img is None:
             kp1, des1 = self._screen_features
             screen_img = self._screen_img
         else:
             kp1, des1 = self._detector.detectAndCompute(screen_img,None)
             
         kp2, des2 = self._detector.detectAndCompute(cam_img,None)
-
         
         index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
         search_params = dict(checks = 50)
@@ -49,43 +71,45 @@ class ScreenFinder(object):
             if m.distance < 0.7*n.distance:
                 good.append(m)
 
-        if len(good)>MIN_MATCH_COUNT:
-            src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
-            dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
+        if len(good) < MIN_MATCH_COUNT: return False
+        
+        src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1,1,2)
+        dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1,1,2)
 
-            M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
-            matchesMask = mask.ravel().tolist()
+        self.recovery_matrix, _ = cv2.findHomography(dst_pts, src_pts, cv2.RANSAC,5.0)
 
-            h,w = self._screen_img.shape
-            pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
-            dst = cv2.perspectiveTransform(pts,M)
+        if debug is False: return True
+        
+        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+        matchesMask = mask.ravel().tolist()
 
-            cv2.draw_oriented_polylines(cam_img,[np.int32(dst)],True,255,3)
+        h,w = self._screen_img.shape
+        pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
+        dst = cv2.perspectiveTransform(pts,M)
+        
+        dst = np.int32(dst.reshape(-1,2))
+        draw_oriented_polylines(cam_img,dst,True,(0,0,255),3)
 
-        else:
-            print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
-            matchesMask = None
-            
-        draw_params = dict(matchColor = (0,255,0), # draw matches in green color
+        draw_params = dict(matchColor = (0,255,0),
                        singlePointColor = None,
                        matchesMask = matchesMask, # draw only inliers
                        flags = 2)
 
-        if debug==True:
-            img3 = draw_match(self._screen_img, kp1, cam_img, kp2,good,None,**draw_params)
-            cv2.imshow('matches', img3)
-
+        img3 = draw_match(self._screen_img, kp1, cam_img, kp2,good,None,**draw_params)
+        cv2.imshow('matches', img3)
+    
     def find_top_view(self, cam_img):
         shape = (self._screen_img.shape[1], self._screen_img.shape[0])
-        img = warpPerspective(cam_img, self.recovery_matrix, shape)
+        img = cv2.warpPerspective(cam_img, self.recovery_matrix, shape)
         return img
-        
+
+
 if __name__ == '__main__':
     sf = ScreenFinder()
     cam = MyCam()
     cam.size = (640, 480)
     
-    img = cv2.imread('seabunny1600.png', 0)
+    img = cv2.imread('seabunny800.png', 0)
     cv2.imshow('source', img)
 
     if img.shape[0] * img.shape[1] > cam.size[0] * cam.size[1]:
@@ -93,10 +117,9 @@ if __name__ == '__main__':
 
     sf.set_screen_img(img)
     while True:
-        cam_img = cv2.flip(cam.read(), 1)
-        sf.find_screen_img(cam_img)
-        cv2.imshow('cam', cam_img)
-        
+        cam_img = cam.read()
+        sf.find_screen_img(cam_img, debug=True)
+        cv2.imshow('top view', sf.find_top_view(cam_img))
         k = cv2.waitKey(5)
         if k == 27:
             break

@@ -22,9 +22,17 @@ def draw_match(img1, kp1,
     
     outimg = np.full((h,w,3), 0, np.uint8)
     
-
-    outimg[0:h1,0:w1, :] = cv2.cvtColor(img1, cv2.COLOR_GRAY2BGR)
-    outimg[0:h2,w1:w1+w2, :] = cv2.cvtColor(img2, cv2.COLOR_GRAY2BGR)
+    img1_ = img1.copy()
+    img2_ = img2.copy()
+    
+    if len(img1.shape) == 2 or img1.shape[2] == 1:
+        img1_= cv2.cvtColor(img1_, cv2.COLOR_GRAY2BGR)
+        
+    if len(img2.shape) == 2 or img2.shape[2] == 1:
+        img2_= cv2.cvtColor(img2_, cv2.COLOR_GRAY2BGR)
+    
+    outimg[0:h1,0:w1, :] = img1_
+    outimg[0:h2,w1:w1+w2, :] = img2_
     
     for i, m in enumerate(matches):
         if matchesMask is not None and matchesMask[i] == 0: continue

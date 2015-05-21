@@ -14,26 +14,28 @@ MIN_MATCH_COUNT = 10
 # Initiate SIFT detector
 sift = cv2.SIFT()
 cam = MyCam()
-cam.size = (640, 480)
-img1 = img1 = cv2.imread('box.png', 0)
-
+cam.size = (160, 120)
+img1 = cv2.imread('seabunny1600.png', 0)
 cv2.imshow('source', img1)
+
+if img1.shape[0] * img1.shape[1] > cam.size[0] * cam.size[1]:
+    img1 = cv2.resize(img1, cam.size)
+
+kp1, des1 = sift.detectAndCompute(img1,None)
+    
 while True:
     
     img2 = cv2.flip(cv2.cvtColor(cam.read(), cv2.COLOR_BGR2GRAY), 1)
     k = cv2.waitKey(5)
     if k == ord('s'):
         img1 = img2.copy()
+        kp1, des1 = sift.detectAndCompute(img1,None)
         cv2.imwrite('campic.png', img1)
+    if k == ord('r'):
+        print cam.frame_rate
     elif k== 27:
         break
     
-    
-    # find the keypoints and descriptors with SIFT
-    if k is not None:
-        cv2.destroyWindow('preview') 
-        kp1, des1 = sift.detectAndCompute(img1,None)
-        
     kp2, des2 = sift.detectAndCompute(img2,None)
 
 
@@ -77,7 +79,6 @@ while True:
     # print [x for x in dir(kp1[0]) if not '__' in x]
 
     # print [x for x in dir(good[0]) if not '__' in x]
-    if matchesMask:
-        img3 = draw_match(img1,kp1,img2,kp2,good,None,**draw_params)
-        cv2.imshow('matches', img3)
+    img3 = draw_match(img1,kp1,img2,kp2,good,None,**draw_params)
+    cv2.imshow('matches', img3)
     

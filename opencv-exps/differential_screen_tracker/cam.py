@@ -19,6 +19,7 @@ class MyCam(object):
             self.cam = VideoCapture(src)
             if not self.cam.isOpened():
                 raise ValueError('Cannot open ' + src + 'as VideoCapture')
+            return
         
         self.cam = cv2.VideoCapture(1)
         if not self.cam.isOpened():
@@ -28,7 +29,7 @@ class MyCam(object):
     def size(self):
         w = self.cam.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
         h = self.cam.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
-        return (w, h)
+        return (int(w), int(h))
 
     @size.setter
     def size(self, shape):

@@ -14,10 +14,13 @@ class ScreenFinder(object):
         self.screen_size = None
         self._md = None
         self._mapping_matrix = None
-        self.screen_shape
+        self.real_screen_shape = None
         
-    def put_cam_img(self, cam_img):
+    def put_calibrate_images(self, screen_image, cam_img):
+        """calibrate(self, screen_image, cam_img) -> None
+        Find the screen corners, transform matrix, and light state"""
     
+        # find screen corners by comparing the difference between previous taken images
         if self._md is None:
             self._md = MotionDetector(N=2, shape=cam_img.shape)
     
@@ -27,45 +30,41 @@ class ScreenFinder(object):
         quadrangles = find_polygons(gray_diff, 4, 0.1, 1000, True, 10)
         
         if quadrangles != []:
-            # The camera is probably not synchronized with display
             self.screens = quadrangles
     
+        if self.screens is not None:
+            self.compute_transform(screen_img)
+        
+        
     
-    def calibrate(self):
+    def compute_transform(self, screen_img):
         
         if self.screens is None:
+            print 'Warning: calibration failed for the screen is not found yet'
             return
         
-        w, h = screen_shape
-            
+        # load the width and height of the real screen
+        w, h = screen_img.shape[1], screen_img.shape[0]
+        self.real_screen_shape = (w, h)
+        
+        # prepare the points
         src_pts = self.screens[0].astype(np.float)
         h, w = screen_img.shape[0], screen_img.shape[1]
         dst_pts = np.array([[0, 0], [0, h], [w, h], [w, 0]], dtype=np.float)
+        
+        # find transformation matrix
         self._mapping_matrix, mask = findHomography(src_pts, dst_pts, RANSAC, 5.0)
+        
     
     def findTopView(self, cam_img):
-        
-        
-        # transform the point and 
-        #dst = perspectiveTransform(laser_pts,M)
-        img = warpPerspective(cam_img, M, (w, h))
-        return 
+        img = warpPerspective(cam_img, self._mapping_matrix, self.real_screen_shape)
+        return img
     
     def find_laser_spots(self, screen_img, cam_img):
         # find location of green/red spots on camera image
         
-        
-        # find the transform matrix from camera image to screen
-        src_pts = self.screens[0].astype(np.float)
-        h, w = screen_img.shape[0], screen_img.shape[1]
-        dst_pts = np.array([[0, 0], [0, h], [w, h], [w, 0]], dtype=np.float)
-        M, mask = findHomography(src_pts, dst_pts, RANSAC, 5.0)
-        
-        # transform the point and 
-        #dst = perspectiveTransform(laser_pts,M)
-        img = warpPerspective(cam_img, M, (w, h))
-        img = Canny(img[:,:,2], 50, 100)
-        imshow('img', img)
+        # transform the point and compute where it is
+        pass
         
         
         
@@ -99,18 +98,21 @@ if __name__ == '__main__':
             
             on = not on
             x = on * 255
-            img = np.full(win_size, (x, x, x), np.uint8)
-            imshow('main', img)
-            
+            screen_img = np.full(win_size, (x, x, x), np.uint8)
+            imshow('main', screen_img)
+            imshow('screen finder', cam_img)
+            # wait so that the camera can capture images completely loaded
+            k = waitKey(20)
             cam_img = cam.read()
-            sf.put_cam_img(cam_img)
-            k = waitKey(5)
+            sf.put_calibrate_images(screen_img, cam_img)
             
-        spots = sf.find_laser_spots(black, cam_img)
-        
+            # delay again to make sure that the image will not change during the camera taking picture
+            k = waitKey(20)
+            
         for rect in sf.screens:
             draw_oriented_polylines(cam_img, rect, 0, (0, 0, 255), 3)
         
+        imshow('topview', sf.findTopView(cam_img))
         
         imshow('main', black)
         imshow('screen finder', cam_img)

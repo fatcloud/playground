@@ -27,13 +27,13 @@ def find_polygons(gray_image_in, edge_num, tolerance=0.1, area_threshold=100, co
     img = gray_image_in.copy()
     lo, hi = 100, 150
     
-    # imshow('img', img)
+    # cv2.imshow('img', img)
     edge = cv2.Canny(img, lo, hi)
     # imshow('edge', edge)
     thresh1, dst = cv2.threshold(edge,edge_threshold,255, cv2.THRESH_BINARY)
     # imshow('thresh', dst)
     ctr, hry = cv2.findContours(dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    # imshow('fndctr', dst)
+    # cv2.imshow('fndctr', dst)
     
     if hry is None: return []
     hry = hry[0]

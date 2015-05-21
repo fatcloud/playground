@@ -7,17 +7,19 @@ press 'f' to print measured frame rate (the frequency MyCam.read() is called).
 import cv2
 from time import clock
 
+
 class MyCam(object):
 
     def __init__(self, src=None):
         self.start_cam(src)
-        self.__fcount, self.__frate, self.__start = 0, 0, 0
+        self.__fcount, self.__frate, self.__start = 0, 0, clock()
     
     def start_cam(self, src=None):
         if src is not None:
             self.cam = VideoCapture(src)
             if not self.cam.isOpened():
                 raise ValueError('Cannot open ' + src + 'as VideoCapture')
+            return
         
         self.cam = cv2.VideoCapture(1)
         if not self.cam.isOpened():
@@ -27,7 +29,7 @@ class MyCam(object):
     def size(self):
         w = self.cam.get(cv2.cv.CV_CAP_PROP_FRAME_WIDTH)
         h = self.cam.get(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT)
-        return (w, h)
+        return (int(w), int(h))
 
     @size.setter
     def size(self, shape):
@@ -40,6 +42,7 @@ class MyCam(object):
         if self.__fcount == 10:
             end = clock()
             self.__frate = 10/(end - self.__start)
+                
             self.__start = clock()
             self.__fcount = 0
         return self.__frame

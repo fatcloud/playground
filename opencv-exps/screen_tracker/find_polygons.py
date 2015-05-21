@@ -3,8 +3,10 @@ import numpy as np
 from cam import MyCam
 from time import time
 
-def draw_oriented_polylines(img, pts, is_closed, color_start, thickness=1, color_end=(0,0,0)):
+def draw_oriented_polylines(img, pts_in, is_closed, color_start, thickness=1, color_end=(0,0,0)):
     img_out = img
+    
+    pts = pts_in.reshape(-1, 2)
     if len(img.shape) == 2 or img.shape[2] == 1:
         img_out = cv2.cvtColor(img_out, cv2.COLOR_GRAY2BGR)
     

@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
 from cam import MyCam
-from fmatch import draw_match
-from find_polygons import find_polygons, draw_oriented_polylines
+from find_polygons import draw_oriented_polylines
 
 
 class ScreenFinder(object):
@@ -124,7 +123,7 @@ class ScreenFinder(object):
 if __name__ == '__main__':
     sf = ScreenFinder()
     cam = MyCam()
-    cam.size = (1280, 720)
+    cam.size = (640, 480)
     
     img = cv2.imread('seabunny800.png', 0)
     cv2.imshow('source', img)

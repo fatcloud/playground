@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from cam import MyCam
 from find_polygons import draw_oriented_polylines
-
+from fmatch import draw_match
 
 class ScreenFinder(object):
     """This class find the location of the screen by feature matching
@@ -47,7 +47,7 @@ class ScreenFinder(object):
         self._screen_features = self._detector.detectAndCompute(screen_img,None)
         self._screen_img = screen_img
     
-    def find_screen_img(self, cam_img, screen_img=None):
+    def find_screen_img(self, cam_img, screen_img=None, debug=False):
         """
         Find screen_img in cam_img.
         If executed successfully, the function return True.
@@ -57,7 +57,7 @@ class ScreenFinder(object):
         
         try:
         
-            MIN_MATCH_COUNT = 10
+            MATCH_THRESHOLD = 10
             FLANN_INDEX_KDTREE = 0
             AREA_THRESHOLD = 1000
             
@@ -82,24 +82,30 @@ class ScreenFinder(object):
             dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1,1,2)
             
             # check the property of the corners found out there
-            self.screen2cam_matrix, _ = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+            self.screen2cam_matrix, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+            matchesMask=mask.ravel().tolist()
 
             h,w = self._screen_img.shape
             pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
             self._screen_corners = cv2.perspectiveTransform(pts, self.screen2cam_matrix)
             
+            if debug: cv2.imshow('debug', draw_match(screen_img, kp1, self.draw_screen_boundary(cam_img), kp2, good, matchesMask=matchesMask))
+            else: cv2.destroyWindow('debug')
             
             if False in [cv2.isContourConvex(self._screen_corners),
-                         cv2.contourArea(self._screen_corners) > AREA_THRESHOLD]:
+                         cv2.contourArea(self._screen_corners) > AREA_THRESHOLD,
+                         sum(matchesMask) > MATCH_THRESHOLD]:
             
                 self.screen2cam_matrix = None
                 self._screen_corners = None
+                
                 return False
             
             self.cam2screen_matrix, _ = cv2.findHomography(dst_pts, src_pts, cv2.RANSAC,5.0)
+            
             return True
         
-        except:
+        except cv2.error:
         
             self.screen2cam_matrix = None
             self._screen_corners = None
@@ -125,7 +131,7 @@ if __name__ == '__main__':
     cam = MyCam()
     cam.size = (640, 480)
     
-    img = cv2.imread('seabunny800.png', 0)
+    img = cv2.imread('seabunny_lying.png', 0)
     cv2.imshow('source', img)
 
     sf.set_screen_img(img)
@@ -137,7 +143,7 @@ if __name__ == '__main__':
         
         while not sf.screen_is_found:
             cam_img = cam.read()
-            sf.find_screen_img(cam_img)
+            sf.find_screen_img(cam_img, debug=True)
             cv2.imshow('Type \'r\' to search for the screen', sf.draw_screen_boundary(cam_img))
             k = cv2.waitKey(5)
             if k == 27:
